@@ -25,7 +25,7 @@ const sendDetail = (data, ctx) => {
 *Judul Lain*:
 ${judulLain}
 *Episode*: \`${data.episode}\`
-*Timestamp*: \`${new Date(data.from * 1000).toISOString().substr(11, 8)}\` - \`${new Date(data.to * 1000).toISOString().substr(11, 8)}\`
+*Timestamp*: \`${new Date(data.from * 1000).toISOString().substr(11, 8)}\`
 *Kemiripan*: \`${(data.similarity * 100).toFixed(1)}%\`
 `;
   ctx.deleteMessage(sedangMencari);
@@ -72,7 +72,7 @@ bot.on('photo', async (ctx) => {
   getData(image, ctx);
 });
 
-switch (process.env.MODE) {
+switch (process.env.NODE_ENV) {
   case 'development': bot.launch(); break;
   case 'production': module.exports = bot; break;
 }
