@@ -7,10 +7,8 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 let sedangMencari;
 let bot;
 
-// Atur mode
-const mode = 'prod';
-
-switch (mode) {
+// Atur mode'
+switch (process.env.MODE) {
   case 'dev': bot = new Telegraf(BOT_TOKEN); break;
   case 'prod': bot = new Composer(); break;
 }
@@ -27,8 +25,8 @@ const sendDetail = (data, ctx) => {
 *Judul Lain*:
 ${judulLain}
 *Episode*: \`${data.episode}\`
-*Timestamp*: \`${new Date(data.from * 1000).toISOString().substr(11, 8)}\`
-*Kemiripan*: \`${(data.similarity * 100).toFixed(2)}%\`
+*Timestamp*: \`${new Date(data.from * 1000).toISOString().substr(11, 8)}\` - \`${new Date(data.to * 1000).toISOString().substr(11, 8)}\`
+*Kemiripan*: \`${(data.similarity * 100).toFixed(1)}%\`
 `;
   ctx.deleteMessage(sedangMencari);
   ctx.replyWithVideo({ url: data.video });
@@ -74,7 +72,7 @@ bot.on('photo', async (ctx) => {
   getData(image, ctx);
 });
 
-switch (mode) {
+switch (process.env.MODE) {
   case 'dev': bot.launch(); break;
   case 'prod': module.exports = bot; break;
 }
