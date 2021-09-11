@@ -1,33 +1,46 @@
-const { Telegraf, Types } = require('telegraf');
+const { Telegraf, Markup } = require('telegraf');
 const { Composer } = require('micro-bot');
 const axios = require('axios');
 require('dotenv').config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 let sedangMencari;
+let bot;
 
-// Development
-// const bot = new Telegraf(BOT_TOKEN);
+// Atur mode
+const mode = 'prod';
 
-// Production
-const bot = new Composer();
+switch (mode) {
+  case 'dev': bot = new Telegraf(BOT_TOKEN); break;
+  case 'prod': bot = new Composer(); break;
+}
 
 const sendDetail = (data, ctx) => {
+  console.log(data);
   const messageId = ctx.update.message.message_id;
-  const detail = `
-Judul: <pre>${data.anilist.title.native}</pre>
-Romaji: <pre>${data.anilist.title.romaji}</pre>
-Inggris: <pre>${data.anilist.title.english}</pre>
-Episode: <pre>${data.episode}</pre>
-Timestamp: <pre>${new Date(data.from * 1000).toISOString().substr(11, 8)}</pre>
-Kemiripan: <pre>${(data.similarity * 100).toFixed(2)}%</pre>
+  const judulLain = data.anilist.synonyms.map(e => {
+    return `- \`${e}\``;
+  }).join('\n');
+  const detail = `*Native*: \`${data.anilist.title.native}\`
+*Romaji*: \`${data.anilist.title.romaji}\`
+*Inggris*: \`${data.anilist.title.english}\`
+*Judul Lain*:
+${judulLain}
+*Episode*: \`${data.episode}\`
+*Timestamp*: \`${new Date(data.from * 1000).toISOString().substr(11, 8)}\`
+*Kemiripan*: \`${(data.similarity * 100).toFixed(2)}%\`
 `;
   ctx.deleteMessage(sedangMencari);
-  ctx.replyWithHTML(detail, { reply_to_message_id: messageId });
   ctx.replyWithVideo({ url: data.video });
-  // console.log('Message ID:', messageId);
-  // console.log(Extra);
-  // ctx.reply(data, Extra.inReplyTo(messageId));
+  ctx.replyWithMarkdown(detail, { 
+    reply_to_message_id: messageId,
+    ...Markup.inlineKeyboard([[
+      Markup.button.url('💵 Donasi', 'https://donate.tfkhdyt.my.id/'),
+      Markup.button.url('💻 Source Code', 'https://github.com/tfkhdyt/anime-naon-ieu')
+    ],[
+      Markup.button.url('💠 Project saya yang lainnya', 'https://tfkhdyt.my.id/#portfolio')
+    ]]) 
+  });
 };
 
 const getData = (image, ctx) => {
@@ -61,8 +74,7 @@ bot.on('photo', async (ctx) => {
   getData(image, ctx);
 });
 
-// Development
-// bot.launch();
-
-// Production
-module.exports = bot;
+switch (mode) {
+  case 'dev': bot.launch(); break;
+  case 'prod': module.exports = bot; break;
+}
